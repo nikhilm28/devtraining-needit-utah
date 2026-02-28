@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_ws_operation">
+    <sys_ws_operation action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <consumes>application/json</consumes>
+        <consumes_customized>false</consumes_customized>
+        <default_operation_uri>/api/x_58872_needit/needit_api/nigetinfor/{user_name}</default_operation_uri>
+        <enforce_acl>cf9d01d3e73003009d6247e603f6a990</enforce_acl>
+        <http_method>GET</http_method>
+        <name>ni_getinfo</name>
+        <operation_script><![CDATA[(function process(/*RESTAPIRequest*/ request, /*RESTAPIResponse*/ response) {
+
+    // implement resource here
+
+	var requestUser = request.pathParams.user_name;
+	var requestNIQuery = request.queryParams.ni_query;
+
+	var requestUserName = new GlideRecord('sys_user');
+	requestUserName.get('user_name', requestUser);
+
+	var userNICount = new GlideAggregate('x_58872_needit_needit');
+	userNICount.addAggregate('COUNT');
+	userNICount.addQuery('u_requested_for', requestUserName.sys_id);
+	userNICount.addEncodedQuery(requestNIQuery);
+	userNICount.groupBy('u_request_type');
+	userNICount.query();
+
+	var needitRecs = 0;
+	var niUserRecs = [];
+	var needitRecsCount = 0;
+
+	while(userNICount.next()){
+		needitRecs = userNICount.getAggregate('COUNT');
+		var reqType = userNICount.u_request_type.getDisplayValue();
+		niUserRecs.push({"requestType": reqType, "count": needitRecs});
+		needitRecsCount = parseInt(needitRecsCount) + parseInt(needitRecs);
+	}
+
+	var body = {};
+	body.totalUserNIRecs = needitRecsCount;
+	body.catCounts = niUserRecs;
+	body.user = {"User name": requestUserName.user_name, "User ID": requestUserName.sys_id};
+
+	response.setBody(body);
+
+})(request, response);]]></operation_script>
+        <operation_uri>/api/x_58872_needit/v1/needit_api/nigetinfor/{user_name}</operation_uri>
+        <produces>application/json,application/xml,text/xml</produces>
+        <produces_customized>false</produces_customized>
+        <relative_path>/nigetinfor/{user_name}</relative_path>
+        <request_example/>
+        <requires_acl_authorization>true</requires_acl_authorization>
+        <requires_authentication>true</requires_authentication>
+        <requires_snc_internal_role>true</requires_snc_internal_role>
+        <short_description>Find the active NeedIt records for a user. Group by What needed.</short_description>
+        <sys_class_name>sys_ws_operation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-02-23 04:17:34</sys_created_on>
+        <sys_id>b3c531a8c35fb210e1c77b2ed401312c</sys_id>
+        <sys_mod_count>4</sys_mod_count>
+        <sys_name>ni_getinfo</sys_name>
+        <sys_package display_value="NeedIt" source="x_58872_needit">6ead8e780f603200cd674f8ce1050ed1</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="NeedIt">6ead8e780f603200cd674f8ce1050ed1</sys_scope>
+        <sys_update_name>sys_ws_operation_b3c531a8c35fb210e1c77b2ed401312c</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-02-28 04:20:23</sys_updated_on>
+        <web_service_definition display_value="NeedIt API">143e5d9cc31b7210e1c77b2ed4013114</web_service_definition>
+        <web_service_version display_value="v1">f786eb8ac3db3210e1c77b2ed4013151</web_service_version>
+    </sys_ws_operation>
+    <sys_es_latest_script action="INSERT_OR_UPDATE">
+        <id>b3c531a8c35fb210e1c77b2ed401312c</id>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-02-23 04:17:33</sys_created_on>
+        <sys_id>edf53568c35fb210e1c77b2ed40131b4</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-02-23 04:17:33</sys_updated_on>
+        <table>sys_ws_operation</table>
+        <use_es_latest>true</use_es_latest>
+    </sys_es_latest_script>
+</record_update>
